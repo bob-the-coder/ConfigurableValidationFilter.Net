@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using ConfigurableFilters.Condition;
 
 namespace ConfigurableFilters
@@ -18,26 +17,33 @@ namespace ConfigurableFilters
 
         #region (Public API)
 
-        public IList<ConditionResult> ApplyConfiguration(TObject obj, FilterConfiguration<TCondition> filterConfiguration)
+        public ValidationResult ApplyConfiguration(TObject obj, FilterConfiguration<TCondition> filterConfiguration)
         {
-            var errors = new List<string>();
-            foreach (var conditionConfig in filterConfiguration.Conditions)
+            var groupResults = new List<ValidationResult>();
+            foreach (var groupConfiguration in filterConfiguration.Groups)
             {
-                ThrowIfNotConfigured(conditionConfig.Type);
+                var conditionResults = new List<ValidationResult>();
+                foreach (var conditionConfig in groupConfiguration.Conditions)
+                {
+                    ThrowIfNotConfigured(conditionConfig.Type);
 
-                var condition = _conditions[conditionConfig.Type];
-                var result = condition.Compare(obj, conditionConfig.Params);
-                if (!result.Success) errors.Add($@"
-{condition.Metadata.Name} {conditionConfig.Params}. Found value {result.ValidatedValue}. 
-{result.Error}");
+                    var condition = _conditions[conditionConfig.Type];
+                    var result = condition.Validate(obj, conditionConfig.Params);
+                    conditionResults.Add(result);
+                }
+
+                groupResults.Add(new ValidationResult
+                {
+                    Internal = conditionResults,
+                    Success = groupConfiguration.ApplyModifier(conditionResults),
+                });
             }
 
-            if (errors.Count == 0) return new List<ConditionResult>(0);
-
-            return errors.Select(error => new ConditionResult
+            return new ValidationResult
             {
-                Error = error
-            }).ToList();
+                Internal = groupResults,
+                Success = filterConfiguration.ApplyModifier(groupResults)
+            };
         }
 
         public void UseCondition<TProperty, TConditionParams>(

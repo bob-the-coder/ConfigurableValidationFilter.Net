@@ -48,7 +48,7 @@ namespace BoxFilterUI.Controllers
         }
 
         [HttpPost]
-        public string Configuration([FromBody]string configurationJson)
+        public string Configuration([FromBody] string configurationJson)
         {
             var configuration = JsonConvert.DeserializeObject<FilterConfiguration<BoxCondition>>(configurationJson);
             if (configuration == null) return null;
@@ -60,7 +60,7 @@ namespace BoxFilterUI.Controllers
                 return JsonConvert.SerializeObject(configuration);
             }
 
-            if(string.IsNullOrWhiteSpace(configuration.Name)) configuration.Name = $"FilterConfiguration_{DateTime.UtcNow.Ticks}";
+            if (string.IsNullOrWhiteSpace(configuration.Name)) configuration.Name = $"FilterConfiguration_{DateTime.UtcNow.Ticks}";
 
             list.Add(configuration.Name);
             _lists.Save("Configurations", list);
@@ -70,17 +70,15 @@ namespace BoxFilterUI.Controllers
 
         [HttpPost]
         [Route("test")]
-        public IEnumerable<ConditionResult> Test([FromBody] string testPayloadJson)
+        public ValidationResult Test([FromBody] string testPayloadJson)
         {
             var testPayload = JsonConvert.DeserializeObject<TestPayload>(testPayloadJson);
             if (testPayload == null)
             {
-                return new List<ConditionResult>
+                return new ValidationResult
                 {
-                    new()
-                    {
-                        Error = "Test Box or Configuration is invalid."
-                    }
+                    Success = false,
+                    Error = "Test Box or Configuration is invalid."
                 };
             }
 

@@ -1,12 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ConfigurableFilters.Condition
 {
-    public class FilterConfiguration<TCondition>
+    public abstract class ConfigurationWithModifier<TCondition>
+    {
+        public ConditionGroupModifier Modifier { get; set; }
+        public int CountMin { get; set; }
+        public int CountMax { get; set; }
+
+        public bool ApplyModifier(ICollection<ValidationResult> results)
+        {
+            var successfulCount = results.Count(_ => _.Success);
+
+            return Modifier == ConditionGroupModifier.All && successfulCount == results.Count ||
+                   Modifier == ConditionGroupModifier.Any && successfulCount > 0 ||
+                   Modifier == ConditionGroupModifier.Count &&
+                   CountMin <= successfulCount && successfulCount <= CountMax;
+        }
+    }
+
+    public class FilterConfiguration<TCondition> : ConfigurationWithModifier<TCondition>
     where TCondition : Enum
     {
         public string Name { get; set; }
+        public List<ConditionGroupConfiguration<TCondition>> Groups { get; set; } = new();
+    }
+
+    public class ConditionGroupConfiguration<TCondition> : ConfigurationWithModifier<TCondition>
+    where TCondition : Enum
+    {
         public List<ConditionConfiguration<TCondition>> Conditions { get; set; } = new();
     }
 

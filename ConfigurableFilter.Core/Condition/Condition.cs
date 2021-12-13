@@ -6,7 +6,7 @@ namespace ConfigurableFilters.Condition
     where TCondition : Enum
     {
         public ConditionMetadata<TCondition> Metadata { get; set; }
-        public abstract ConditionResult Compare(TObject obj, ConditionParams conditionParams);
+        public abstract ValidationResult Validate(TObject obj, ConditionParams conditionParams);
     }
 
     internal sealed class Condition<TCondition, TObject, TProperty> : Condition<TCondition, TObject>
@@ -25,17 +25,17 @@ namespace ConfigurableFilters.Condition
             Metadata = metaData;
         }
 
-        public override ConditionResult Compare(TObject obj, ConditionParams conditionParams)
+        public override ValidationResult Validate(TObject obj, ConditionParams conditionParams)
         {
             var value = _valueProvider(obj);
             var success = _comparator(value, conditionParams);
-            return new ConditionResult
+            return new ValidationResult
             {
                 Success = success,
                 ValidatedValue = value.ToString(),
                 Error = success
-                    ? null : (conditionParams is ConditionParamsWithError withError) 
-                        ? withError.Error : "Comparison failed."
+                    ? null : conditionParams is ConditionParamsWithError withError 
+                        ? withError.Error : $"{Metadata.Name} {conditionParams}. Found value {value}."
             };
         }
     }
