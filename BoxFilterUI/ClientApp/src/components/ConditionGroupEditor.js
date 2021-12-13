@@ -1,7 +1,16 @@
-import React, { useState } from "react";
+import React from "react";
 import ConditionEditor from "./ConditionEditor";
 
 const modifiers = [ 'All', 'Any', 'Count' ];
+
+const renderTitle = function(props) {
+    let group = props.group;
+    return (
+        <div className='row' onClick={_ => props.onChange({...group, visible: !group.visible})}>
+            <h4>Group {group.number} <tiny style={{fontSize: '0.5em', fontStyle: 'italic'}}>(Click to {group.visible ? 'collapse' : 'expand'})</tiny></h4>
+        </div>
+    );
+}
 
 export default function(props) {
     let { 
@@ -9,8 +18,6 @@ export default function(props) {
         conditionMetadata, 
         conditionTypes 
     } = props;
-
-    const [ visible, setVisible ] = useState(true);
 
     const addCondition = function (){
         group.conditions.push({ type: conditionTypes[0], params: {}});
@@ -27,12 +34,10 @@ export default function(props) {
         props.onChange(group);
     }
 
-    if (!visible) return (
+    if (!group.visible) return (
         <div class='card container'>
             <div className='card-body'>
-                <div className='row'>
-                    <h4 onClick={_ => setVisible(true)}>Group {group.number}</h4>
-                </div>
+                {renderTitle(props, group.visible)}
             </div>
         </div>
     )
@@ -40,9 +45,7 @@ export default function(props) {
     return (
         <div class='card container'>
             <div className='card-body'>
-                <div className='row'>
-                    <h4 onClick={_ => setVisible(false)}>Group {group.number}</h4>
-                </div>
+                {renderTitle(props, group.visible)}
                 <div className='row'>
                     <div className='col-3'>
                         <select defaultValue={group.modifier} className='form-control' onChange={_ => props.onChange({...group, modifier: +_.target.value})}>

@@ -51,6 +51,7 @@ export default class ConfigurationEditor extends React.Component {
                 groups: config.Groups.map(group => {
                     return {
                         number: currentGroupNumber++,
+                        visible: false,
                         modifier: group.Modifier,
                         countMin: group.CountMin,
                         countmax: group.CountMax,
@@ -191,7 +192,8 @@ export default class ConfigurationEditor extends React.Component {
         let groups = this.state.groups;
         groups.push({
             ...defaultGroup,
-            number: currentGroupNumber++
+            number: currentGroupNumber++,
+            visible: true
         })
 
         $this.setState({
