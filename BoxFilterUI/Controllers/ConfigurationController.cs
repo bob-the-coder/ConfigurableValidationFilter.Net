@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using BoxFilterExample;
 using ConfigurableFilters.Condition;
@@ -82,7 +83,15 @@ namespace BoxFilterUI.Controllers
                 };
             }
 
-            return _filter.ApplyConfiguration(testPayload.Box, testPayload.Configuration);
+            var watch = Stopwatch.StartNew();
+            var result = _filter.ApplyConfiguration(testPayload.Box, testPayload.Configuration);
+            watch.Stop();
+            result.MetaData = new
+            {
+                Elapsed = watch.Elapsed.ToString()
+            };
+
+            return result;
         }
 
         private void CreateListIfNull()

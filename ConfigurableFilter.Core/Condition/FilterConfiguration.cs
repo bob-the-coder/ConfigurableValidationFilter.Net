@@ -19,6 +19,20 @@ namespace ConfigurableFilters.Condition
                    Modifier == ConditionGroupModifier.Count &&
                    CountMin <= successfulCount && successfulCount <= CountMax;
         }
+
+        public string GetModifierError()
+        {
+            return Modifier switch
+            {
+                ConditionGroupModifier.All => "All conditions in this group should be true.",
+                ConditionGroupModifier.Any => "At least one condition in this group should be true.",
+                ConditionGroupModifier.Count when CountMin > CountMax =>
+                    $"The minimum number of true conditions must be lower than the maximum number.",
+                ConditionGroupModifier.Count =>
+                    $"Between {CountMin} and {CountMax} conditions in this group should be true.",
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
     }
 
     public class FilterConfiguration<TCondition> : ConfigurationWithModifier<TCondition>

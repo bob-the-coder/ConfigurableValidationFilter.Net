@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using ConfigurableFilters.Condition;
 
 namespace ConfigurableFilters
@@ -12,16 +13,31 @@ namespace ConfigurableFilters
 
         private readonly Dictionary<TCondition, Condition<TCondition, TObject>> _conditions = new();
         public readonly Dictionary<TCondition, ConditionMetadata<TCondition>> MetaData = new();
-        
+
         #endregion
 
         #region (Public API)
 
         public ValidationResult ApplyConfiguration(TObject obj, FilterConfiguration<TCondition> filterConfiguration)
         {
+            if (filterConfiguration.Groups.Count == 0 || filterConfiguration.Groups.All(group => group.Conditions.Count == 0))
+                return new ValidationResult
+                {
+                    Success = false,
+                    Error = "No conditions were specified"
+                };
+
             var groupResults = new List<ValidationResult>();
             foreach (var groupConfiguration in filterConfiguration.Groups)
             {
+                if (groupConfiguration.CountMin > groupConfiguration.CountMax)
+                {
+                    groupResults.Add(new ValidationResult
+                    {
+                        Error = groupConfiguration.GetModifierError()
+                    });
+                    continue;
+                }
                 var conditionResults = new List<ValidationResult>();
                 foreach (var conditionConfig in groupConfiguration.Conditions)
                 {
@@ -32,17 +48,21 @@ namespace ConfigurableFilters
                     conditionResults.Add(result);
                 }
 
+                var groupSuccess = groupConfiguration.ApplyModifier(conditionResults);
                 groupResults.Add(new ValidationResult
                 {
                     Internal = conditionResults,
-                    Success = groupConfiguration.ApplyModifier(conditionResults),
+                    Success = groupSuccess,
+                    Error = groupSuccess ? null : groupConfiguration.GetModifierError()
                 });
             }
 
+            var filterSuccess = filterConfiguration.ApplyModifier(groupResults);
             return new ValidationResult
             {
                 Internal = groupResults,
-                Success = filterConfiguration.ApplyModifier(groupResults)
+                Success = filterSuccess,
+                Error = filterSuccess ? null : filterConfiguration.GetModifierError()
             };
         }
 

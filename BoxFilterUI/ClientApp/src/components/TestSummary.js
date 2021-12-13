@@ -1,17 +1,38 @@
-import React from 'react';
+import React, { useState } from 'react';
+
+const defaultResult = {
+    success: false,
+    error: 'Test has not been run yet.',
+    metadata: {
+        elapsed: 'N/A'
+    }
+}
+
+const renderResult = function(result, seed, index) {
+    let errors = [<code key={seed + index} style={{whiteSpace: "pre-wrap", display: 'block'}}>{result.error}</code>];
+    if (!result.internal || !result.internal.length) return errors;
+
+    return errors.concat(result.internal.map((_, _i) => renderResult(_, seed + index, _i)));
+}
 
 export default function(props) {
+    const [showDetails, setShowDetails] = useState(false);
+    let result = props.result || defaultResult;
+
     return (
         <div>
             <h2>Compare</h2>
             <br />
-            <b>Result: {props.result.length === 0 ? 'Passed' : 'Failed'}</b>
-            <br />
-            <b>Summary:</b>
-            <br />
-            <code style={{whiteSpace: "pre-wrap"}}>
-                {props.result.map(_ => <div>{_}</div>)}
-            </code>
+            <b>Test Summary: {result.success ? 'Passed' : 'Failed'}</b>
+            <br/>
+            {result.metaData && [
+                <code style={{whiteSpace: "pre-wrap"}}>Elapsed: {result.metaData.elapsed}</code>,
+                <br />
+            ]}
+            <i onClick={_ => setShowDetails(!showDetails)}>{showDetails ? 'Hide' : 'Show'} Details</i>
+            {showDetails && (<div>
+                {renderResult(result, 0, 0)}
+            </div>)}
         </div>
     )
 }

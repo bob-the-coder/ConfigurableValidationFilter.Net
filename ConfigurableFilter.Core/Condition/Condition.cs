@@ -29,13 +29,14 @@ namespace ConfigurableFilters.Condition
         {
             var value = _valueProvider(obj);
             var success = _comparator(value, conditionParams);
+            var defaultError = $"{Metadata.Name} {conditionParams}. Found value {value}.";
             return new ValidationResult
             {
                 Success = success,
                 ValidatedValue = value.ToString(),
                 Error = success
                     ? null : conditionParams is ConditionParamsWithError withError 
-                        ? withError.Error : $"{Metadata.Name} {conditionParams}. Found value {value}."
+                        ? withError.Error ?? defaultError : defaultError
             };
         }
     }
