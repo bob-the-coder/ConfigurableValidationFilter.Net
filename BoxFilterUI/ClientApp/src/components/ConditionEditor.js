@@ -18,7 +18,7 @@ export default function(props) {
                                 defaultValue={condition.type} 
                                 onChange={event => props.onChange({type: event.target.value, params: {}})}>
                                 {conditionTypes.map(function(conditionType){
-                                    return <option value={conditionType}>{conditionMetadata[conditionType].Name}</option>
+                                    return <option key={conditionType} value={conditionType}>{conditionMetadata[conditionType].Name}</option>
                                 })}
                             </select>
                         </div>
@@ -38,7 +38,7 @@ export default function(props) {
                 <div className='row'>
                     <b>ParamType: </b>{conditionMetadata[condition.type].ParamType}
                     <div>{conditionMetadata[condition.type].Description}</div>
-                    <button className='btn btn-danger' onClick={props.onRemove}>Remove Condition</button>
+                    <button className='btn btn-danger col-6' onClick={props.onRemove}>Remove Condition</button>
                 </div>
             </div>
         </div>

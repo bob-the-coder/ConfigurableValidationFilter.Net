@@ -24,7 +24,7 @@ namespace ConfigurableFilters
                 return new ValidationResult
                 {
                     Success = false,
-                    Error = "No conditions were specified"
+                    Error = "Filter: No conditions were specified"
                 };
 
             var groupResults = new List<ValidationResult>();
@@ -34,7 +34,7 @@ namespace ConfigurableFilters
                 {
                     groupResults.Add(new ValidationResult
                     {
-                        Error = groupConfiguration.GetModifierError()
+                        Error = groupConfiguration.GetModifierError(groupConfiguration.Name)
                     });
                     continue;
                 }
@@ -53,7 +53,7 @@ namespace ConfigurableFilters
                 {
                     Internal = conditionResults,
                     Success = groupSuccess,
-                    Error = groupSuccess ? null : groupConfiguration.GetModifierError()
+                    Error = groupSuccess ? null : groupConfiguration.GetModifierError(groupConfiguration.Name)
                 });
             }
 
@@ -62,7 +62,7 @@ namespace ConfigurableFilters
             {
                 Internal = groupResults,
                 Success = filterSuccess,
-                Error = filterSuccess ? null : filterConfiguration.GetModifierError()
+                Error = filterSuccess ? null : filterConfiguration.GetModifierError("Filter")
             };
         }
 

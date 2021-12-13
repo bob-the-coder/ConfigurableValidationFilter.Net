@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace ConfigurableFilters.Condition
 {
-    public abstract class ConfigurationWithModifier<TCondition>
+    public abstract class ConfigurationWithModifier
     {
         public ConditionGroupModifier Modifier { get; set; }
         public int CountMin { get; set; }
@@ -20,31 +20,34 @@ namespace ConfigurableFilters.Condition
                    CountMin <= successfulCount && successfulCount <= CountMax;
         }
 
-        public string GetModifierError()
+        public string GetModifierError(string groupName)
         {
-            return Modifier switch
+            var error = Modifier switch
             {
                 ConditionGroupModifier.All => "All conditions in this group should be true.",
                 ConditionGroupModifier.Any => "At least one condition in this group should be true.",
                 ConditionGroupModifier.Count when CountMin > CountMax =>
-                    $"The minimum number of true conditions must be lower than the maximum number.",
+                    "The minimum number of conditions must be lower than or equal to the maximum.",
                 ConditionGroupModifier.Count =>
                     $"Between {CountMin} and {CountMax} conditions in this group should be true.",
                 _ => throw new ArgumentOutOfRangeException()
             };
+
+            return $"{groupName}: {error}";
         }
     }
 
-    public class FilterConfiguration<TCondition> : ConfigurationWithModifier<TCondition>
+    public class FilterConfiguration<TCondition> : ConfigurationWithModifier
     where TCondition : Enum
     {
         public string Name { get; set; }
         public List<ConditionGroupConfiguration<TCondition>> Groups { get; set; } = new();
     }
 
-    public class ConditionGroupConfiguration<TCondition> : ConfigurationWithModifier<TCondition>
+    public class ConditionGroupConfiguration<TCondition> : ConfigurationWithModifier
     where TCondition : Enum
     {
+        public string Name { get; set; }
         public List<ConditionConfiguration<TCondition>> Conditions { get; set; } = new();
     }
 

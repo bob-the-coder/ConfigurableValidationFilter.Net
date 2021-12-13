@@ -18,6 +18,8 @@ export default class ConfigurationEditor extends React.Component {
     constructor(props) {
         super(props);
 
+        currentGroupNumber = 1;
+
         this.state = {
             name: 'New Configuration',
             groups: [],
@@ -50,11 +52,12 @@ export default class ConfigurationEditor extends React.Component {
                 name: config.Name,
                 groups: config.Groups.map(group => {
                     return {
-                        number: currentGroupNumber++,
+                        number: currentGroupNumber,
+                        name: `Group ${currentGroupNumber++}`,
                         visible: false,
                         modifier: group.Modifier,
                         countMin: group.CountMin,
-                        countmax: group.CountMax,
+                        countMax: group.CountMax,
                         conditions: group.Conditions.map(({Type, Params}) => {
                             return {type: +Type, params: {
                                 value: Params.Value,
@@ -102,6 +105,7 @@ export default class ConfigurationEditor extends React.Component {
             Groups: config.groups.map(group => {
 
                 return {
+                    Name: group.name,
                     Modifier: group.modifier,
                     CountMin: group.countMin,
                     CountMax: group.countMax,
@@ -135,6 +139,10 @@ export default class ConfigurationEditor extends React.Component {
         api.post('api/configuration', JSON.stringify(this.getConfigForServer()))
         .then(() => {
             $this.setState({...$this.state, saved: true})
+
+            setTimeout(() => {
+                $this.setState({...$this.state, saved: false})
+            }, 3000);
         })
         return false;
     }
@@ -215,12 +223,21 @@ export default class ConfigurationEditor extends React.Component {
 
     render() {
         let $state = this.state;
-        if ($state.saved) return <Redirect to='/' />;
+        
         if (!$state.metadata || !$state.conditionTypes.length) return <h4>Loading</h4>
+
+        const width = 1400;
+        const containerStyle = {
+            width: width,
+            marginLeft: -width / 2,
+            position: 'absolute',
+            left: '50%'
+        };
+
         return (
-            <div className="container">
+            <div style={containerStyle}>
                 <div className="row">
-                    <div className="col-7 card card-body">
+                    <div className="col-6 card card-body">
                         <h2>Edit Configuration</h2>
                         <form onSubmit={_ => this.save(_)}>
                             <div className='form-group'>
@@ -228,13 +245,13 @@ export default class ConfigurationEditor extends React.Component {
                                 <input name="name" 
                                     className='form-control'
                                     placeholder="Configuration Name" 
-                                    value={$state.name} 
+                                    defaultValue={$state.name} 
                                     onBlur={event => this.setState({
                                         ...this.state,
                                         name: event.target.value
                                     })} />
                             </div>
-                            <div style={{overflowX: 'hidden', overflowY: 'auto', maxHeight: '65vh'}}>
+                            <div className='' style={{overflowX: 'hidden', overflowY: 'auto', maxHeight: '65vh'}}>
                                 {$state.groups.map((group, index) => 
                                     <ConditionGroupEditor 
                                         key={index}
@@ -245,18 +262,18 @@ export default class ConfigurationEditor extends React.Component {
                                         onRemove={() => this.removeGroup(index)}
                                     />)}
                             </div>
-                            <br/>
-                            <button className='btn btn-info' onClick={_ => _.preventDefault() || this.addGroup()}>Add Group</button>
-                            <input type="submit" className='btn btn-success' value="Save" />
+                            <div className='card-body'>
+                                <button className='btn btn-info col-6' onClick={_ => _.preventDefault() || this.addGroup()}>Add Condition Group</button>
+                                <input type="submit" className='btn btn-success col-6' value="Save Filter" />
+                                {$state.saved && <div style={{textAlign: 'center'}}>Configuration saved!</div>}
+                            </div>
                         </form>
                     </div>
-                    <div className="col">
-                        <div className='card card-body'>
-                            <BoxEditor box={$state.testBox} onUpdate={newBox => this.handleTestBoxChange(newBox)} />
-                        </div>
-                        <div className='card card-body'>
-                            <TestSummary result={$state.testResult} />
-                        </div>
+                    <div className="col-3 card card-body">
+                        <BoxEditor box={$state.testBox} onUpdate={newBox => this.handleTestBoxChange(newBox)} />
+                    </div>
+                    <div className="col-3 card card-body">
+                        <TestSummary result={$state.testResult} />
                     </div>
                 </div>
             </div>

@@ -16,19 +16,18 @@ const renderResult = function(result, seed, index) {
 }
 
 export default function(props) {
-    const [showDetails, setShowDetails] = useState(false);
+    const [showDetails, setShowDetails] = useState(true);
     let result = props.result || defaultResult;
 
     return (
         <div>
-            <h2>Compare</h2>
+            <h2>Test the Box</h2>
             <br />
             <b>Test Summary: {result.success ? 'Passed' : 'Failed'}</b>
             <br/>
-            {result.metaData && [
-                <code style={{whiteSpace: "pre-wrap"}}>Elapsed: {result.metaData.elapsed}</code>,
-                <br />
-            ]}
+            {result.metaData && 
+                <code style={{whiteSpace: "pre-wrap", display: 'block'}}>Elapsed: {result.metaData.elapsed}</code>
+            }
             <i onClick={_ => setShowDetails(!showDetails)}>{showDetails ? 'Hide' : 'Show'} Details</i>
             {showDetails && (<div>
                 {renderResult(result, 0, 0)}
