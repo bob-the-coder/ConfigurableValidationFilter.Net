@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>ConfigurableFilters</AssemblyName>
+    <RootNamespace>ConfigurableFilters</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Factory\**" />
+    <Compile Remove="ObjectFilter\**" />
+    <EmbeddedResource Remove="Factory\**" />
+    <EmbeddedResource Remove="ObjectFilter\**" />
+    <None Remove="Factory\**" />
+    <None Remove="ObjectFilter\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Box.cs" />
+    <Compile Remove="BoxStats.cs" />
+    <Compile Remove="BoxStatsProviders.cs" />
+    <Compile Remove="BoxTrackingSettings.cs" />
+    <Compile Remove="Class1.cs" />
+    <Compile Remove="Condition\ConditionConfiguration.cs" />
+    <Compile Remove="Extensions.cs" />
+    <Compile Remove="FilterPropertyStore.cs" />
+    <Compile Remove="Prefabs\DefaultFilterConverter.cs" />
+    <Compile Remove="Prefabs\DefaultJsonConverter.cs" />
+    <Compile Remove="Prefabs\DefaultParamJsonConverter.cs" />
+    <Compile Remove="Prefabs\TrackingParams.cs" />
+    <Compile Remove="ServiceConsumer.cs" />
+    <Compile Remove="TrackerPrefabs.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="NLog" Version="4.7.12" />
+  </ItemGroup>
+
+</Project>
