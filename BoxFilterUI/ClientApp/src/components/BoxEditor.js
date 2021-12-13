@@ -7,39 +7,85 @@ export default function(props) {
     let volume = (box.Height / 10) * (box.Width / 10) * (box.Depth / 10);
     let density = box.Weight / (box.Height / 100 * box.Width / 100  * box.Depth / 100);
 
+    const handleUpdate = function(propName, value) {
+        let newBox = props.box;
+        newBox[propName] = value;
+        props.onUpdate(newBox);
+    }
+
+    const inputFor = function(propName) {
+        return (
+            <input className='form-control'
+                defaultValue={props.box[propName]} 
+                onBlur={event => handleUpdate(propName, event.target.value)} />
+        );
+    }
+
     return (
         <div>
-            <h2>Test Box</h2>
+            <h2>Design a Box</h2>
             <div>
-                <input placeholder="Height (cm)" 
-                    defaultValue={props.box.Height} 
-                    onBlur={event => props.onUpdate({...props.box, Height: event.target.value })} />
-                <br />
-                <input placeholder="Width (cm)" 
-                    defaultValue={props.box.Width} 
-                    onBlur={event => props.onUpdate({...props.box, Width: event.target.value })} />
-                <br />
-                <input placeholder="Depth (cm)" 
-                    defaultValue={props.box.Depth} 
-                    onBlur={event => props.onUpdate({...props.box, Depth: event.target.value })} />
-                <br />
-                <input placeholder="Weight (kg)" 
-                    defaultValue={props.box.Weight} 
-                    onBlur={event => props.onUpdate({...props.box, Weight: event.target.value })} />
-                <br />
-                <input placeholder="Color" 
-                    defaultValue={props.box.Color} 
-                    onBlur={event => props.onUpdate({...props.box, Color: event.target.value })} />
-                <br />
-                <input placeholder="Received On" 
-                    defaultValue={props.box.ReceivedOn} 
-                    onBlur={event => props.onUpdate({...props.box, ReceivedOn: event.target.value })} />
-                <h4>Computed Values</h4>
-                <b>Area (cm^2): </b>{area}
-                <br />
-                <b>Volume (l): </b>{volume}
-                <br />
-                <b>Density (kg/m^3): </b>{density}
+                <table className='table'>
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>Height (cm)</th>
+                            <td>
+                                {inputFor('Height')}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Width (cm)</th>
+                            <td>
+                                {inputFor('Width')}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Depth (cm)</th>
+                            <td>
+                                {inputFor('Depth')}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Weight (kg)</th>
+                            <td>
+                                {inputFor('Weight')}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Color</th>
+                            <td>
+                                {inputFor('Color')}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Received On</th>
+                            <td>
+                                {inputFor('ReceivedOn')}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th colspan='2' style={{textAlign: 'center'}}>Computed</th>
+                        </tr>
+                        <tr>
+                            <th>Area</th>
+                            <td>{area} cm^2</td>
+                        </tr>
+                        <tr>
+                            <th>Volume</th>
+                            <td>{volume} liters</td>
+                        </tr>
+                        <tr>
+                            <th>Density</th>
+                            <td>{density} kg/m^3</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     )

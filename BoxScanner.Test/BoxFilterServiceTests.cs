@@ -10,7 +10,7 @@ namespace BoxFilter.Test
     {
         private ConfigurableBoxFilter _sut;
         private BoxBuilder _boxBuilder;
-        private static readonly Random Rng = new ();
+        private static readonly Random Rng = new();
 
         [SetUp]
         public void Setup()
@@ -29,7 +29,7 @@ namespace BoxFilter.Test
             var result = _sut.ApplyConfiguration(box1, BoxFilters.TallAndHeavy);
             watch.Stop();
 
-            result.Count.Should().Be(0, "The box is Tall and Heavy");
+            result.Success.Should().BeTrue("The box is Tall and Heavy");
             Console.WriteLine($"Time elapsed: {watch.ElapsedMilliseconds}ms");
             Console.WriteLine(string.Join("\n", result));
 
@@ -37,7 +37,7 @@ namespace BoxFilter.Test
             result = _sut.ApplyConfiguration(box1, BoxFilters.SmallAndLight);
             watch.Stop();
 
-            result.Count.Should().BeGreaterThan(0, "The box is neither Small nor Light");
+            result.Success.Should().BeFalse("The box is neither Small nor Light");
             Console.WriteLine($"Time elapsed: {watch.ElapsedMilliseconds}ms");
             Console.WriteLine(string.Join("\n", result));
         }
@@ -54,8 +54,8 @@ namespace BoxFilter.Test
             int totalSucceeded = 0,
                 totalFailed = 0;
 
-            double totalElapsedSucceeded = 0,
-                totalElapsedFailed = 0;
+            var totalElapsedSucceeded = TimeSpan.Zero;
+            var totalElapsedFailed = TimeSpan.Zero;
 
             while (nBoxes-- > 0)
             {
@@ -76,18 +76,18 @@ namespace BoxFilter.Test
             }
 
             Console.WriteLine($"Boxes checked: {totalFailed + totalSucceeded}");
-            Console.WriteLine($"Total duration: {TimeSpan.FromMilliseconds(totalElapsedFailed + totalElapsedSucceeded)}");
+            Console.WriteLine($"Total duration: {totalElapsedFailed + totalElapsedSucceeded}");
             Console.WriteLine();
             Console.WriteLine($"Total failed: {totalFailed}");
-            Console.WriteLine($"Total duration (failed): {TimeSpan.FromMilliseconds(totalElapsedFailed)}");
-            Console.WriteLine($"Average duration (failed): {TimeSpan.FromMilliseconds(totalFailed == 0 ? 0 : totalElapsedFailed / totalFailed)}");
+            Console.WriteLine($"Total duration (failed): {totalElapsedFailed}");
+            Console.WriteLine($"Average duration (failed): {TimeSpan.FromMilliseconds(totalFailed == 0 ? 0 : (double)totalElapsedFailed.Milliseconds / totalFailed)}");
             Console.WriteLine();
             Console.WriteLine($"Total succeeded: {totalSucceeded}");
-            Console.WriteLine($"Total duration (succeeded): {TimeSpan.FromMilliseconds(totalElapsedSucceeded)}");
-            Console.WriteLine($"Average duration (succeeded): {TimeSpan.FromMilliseconds(totalSucceeded == 0 ? 0 : totalElapsedSucceeded / totalSucceeded)}");
+            Console.WriteLine($"Total duration (succeeded): {totalElapsedSucceeded}");
+            Console.WriteLine($"Average duration (succeeded): {TimeSpan.FromMilliseconds(totalSucceeded == 0 ? 0 : (double)totalElapsedSucceeded.Milliseconds / totalSucceeded)}");
         }
 
-        private (bool success, double elapsedMs) CheckOneBox()
+        private (bool success, TimeSpan elapsed) CheckOneBox()
         {
             var box = BoxBuilder.RandomBox();
 
@@ -95,7 +95,7 @@ namespace BoxFilter.Test
             var result = _sut.ApplyConfiguration(box, BoxFilters.PlainBrownBox);
             watch.Stop();
 
-            return (result.Count == 0, watch.Elapsed.TotalMilliseconds);
+            return (result.Success, watch.Elapsed);
         }
     }
 }

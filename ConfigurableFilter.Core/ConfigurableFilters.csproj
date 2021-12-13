@@ -7,10 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ConditionGroup\**" />
     <Compile Remove="Factory\**" />
     <Compile Remove="ObjectFilter\**" />
+    <EmbeddedResource Remove="ConditionGroup\**" />
     <EmbeddedResource Remove="Factory\**" />
     <EmbeddedResource Remove="ObjectFilter\**" />
+    <None Remove="ConditionGroup\**" />
     <None Remove="Factory\**" />
     <None Remove="ObjectFilter\**" />
   </ItemGroup>

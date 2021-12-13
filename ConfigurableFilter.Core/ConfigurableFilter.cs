@@ -13,31 +13,57 @@ namespace ConfigurableFilters
 
         private readonly Dictionary<TCondition, Condition<TCondition, TObject>> _conditions = new();
         public readonly Dictionary<TCondition, ConditionMetadata<TCondition>> MetaData = new();
-        
+
         #endregion
 
         #region (Public API)
 
-        public IList<ConditionResult> ApplyConfiguration(TObject obj, FilterConfiguration<TCondition> filterConfiguration)
+        public ValidationResult ApplyConfiguration(TObject obj, FilterConfiguration<TCondition> filterConfiguration)
         {
-            var errors = new List<string>();
-            foreach (var conditionConfig in filterConfiguration.Conditions)
-            {
-                ThrowIfNotConfigured(conditionConfig.Type);
+            if (filterConfiguration.Groups.Count == 0 || filterConfiguration.Groups.All(group => group.Conditions.Count == 0))
+                return new ValidationResult
+                {
+                    Success = false,
+                    Error = "Filter: No conditions were specified"
+                };
 
-                var condition = _conditions[conditionConfig.Type];
-                var result = condition.Compare(obj, conditionConfig.Params);
-                if (!result.Success) errors.Add($@"
-{condition.Metadata.Name} {conditionConfig.Params}. Found value {result.ValidatedValue}. 
-{result.Error}");
+            var groupResults = new List<ValidationResult>();
+            foreach (var groupConfiguration in filterConfiguration.Groups)
+            {
+                if (groupConfiguration.CountMin > groupConfiguration.CountMax)
+                {
+                    groupResults.Add(new ValidationResult
+                    {
+                        Error = groupConfiguration.GetModifierError(groupConfiguration.Name)
+                    });
+                    continue;
+                }
+                var conditionResults = new List<ValidationResult>();
+                foreach (var conditionConfig in groupConfiguration.Conditions)
+                {
+                    ThrowIfNotConfigured(conditionConfig.Type);
+
+                    var condition = _conditions[conditionConfig.Type];
+                    var result = condition.Validate(obj, conditionConfig.Params);
+                    conditionResults.Add(result);
+                }
+
+                var groupSuccess = groupConfiguration.ApplyModifier(conditionResults);
+                groupResults.Add(new ValidationResult
+                {
+                    Internal = conditionResults,
+                    Success = groupSuccess,
+                    Error = groupSuccess ? null : groupConfiguration.GetModifierError(groupConfiguration.Name)
+                });
             }
 
-            if (errors.Count == 0) return new List<ConditionResult>(0);
-
-            return errors.Select(error => new ConditionResult
+            var filterSuccess = filterConfiguration.ApplyModifier(groupResults);
+            return new ValidationResult
             {
-                Error = error
-            }).ToList();
+                Internal = groupResults,
+                Success = filterSuccess,
+                Error = filterSuccess ? null : filterConfiguration.GetModifierError("Filter")
+            };
         }
 
         public void UseCondition<TProperty, TConditionParams>(

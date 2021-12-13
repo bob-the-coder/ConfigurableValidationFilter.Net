@@ -11,22 +11,30 @@ namespace BoxFilter.Test
         [Test]
         public void SerializationWorksWhenConfigured()
         {
-            var codedFilter = BoxFilters.PlainBrownBox;
+            var originalConfig = BoxFilters.PlainBrownBox;
 
-            var serialized = JsonConvert.SerializeObject(codedFilter);
+            var serialized = JsonConvert.SerializeObject(originalConfig);
             var deserialized = JsonConvert.DeserializeObject<FilterConfiguration<BoxCondition>>(serialized);
 
             Assert.That(deserialized != null);
 
-            deserialized.Conditions.Count.Should().Be(codedFilter.Conditions.Count);
+            deserialized.Groups.Count.Should().Be(originalConfig.Groups.Count);
 
-            for (var i = 0; i < codedFilter.Conditions.Count; i++)
+            for (var i = 0; i < originalConfig.Groups.Count; i++)
             {
-                var conditionConfig = codedFilter.Conditions[i];
-                var loadedConditionConfig = deserialized.Conditions[i];
+                var originalGroupConfig = originalConfig.Groups[i];
+                var deserializedGroupConfig = deserialized.Groups[i];
 
-                conditionConfig.Type.Should().Be(loadedConditionConfig.Type);
-                conditionConfig.Params.GetType().FullName.Should().Be(loadedConditionConfig.Params.GetType().FullName);
+                originalGroupConfig.Conditions.Count.Should().Be(deserializedGroupConfig.Conditions.Count);
+
+                for (var j = 0; j < originalGroupConfig.Conditions.Count; j++)
+                {
+                    var originalConditionConfig = originalGroupConfig.Conditions[j];
+                    var deserializedConditionConfig = deserializedGroupConfig.Conditions[j];
+
+                    originalConditionConfig.Type.Should().Be(deserializedConditionConfig.Type);
+                    originalConditionConfig.Params.GetType().FullName.Should().Be(deserializedConditionConfig.Params.GetType().FullName);
+                }
             }
         }
 

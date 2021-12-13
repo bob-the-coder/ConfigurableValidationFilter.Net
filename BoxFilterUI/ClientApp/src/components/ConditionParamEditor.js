@@ -15,7 +15,7 @@ const SingleEditor = function(props) {
     return (
         <div className='row'>
             <input placeholder="Value" className='form-control col'
-                value={props.conditionParams.value} 
+                defaultValue={props.conditionParams.value} 
                 onBlur={event => props.onUpdate({...props.conditionParams, value: event.target.value })} />
         </div>
     );
@@ -25,10 +25,10 @@ const MinMaxEditor = function(props) {
     return (
         <div className='row'>
             <input placeholder="Min" className='form-control col-6'
-                value={props.conditionParams.min} 
+                defaultValue={props.conditionParams.min} 
                 onBlur={event => props.onUpdate({...props.conditionParams, min: event.target.value })} />
             <input placeholder="Max" className='form-control col-6'
-                value={props.conditionParams.max} 
+                defaultValue={props.conditionParams.max} 
                 onBlur={event => props.onUpdate({...props.conditionParams, max: event.target.value })} />
         </div>
     );
