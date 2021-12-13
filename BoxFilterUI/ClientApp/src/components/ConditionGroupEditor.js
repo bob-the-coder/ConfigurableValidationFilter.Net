@@ -8,7 +8,10 @@ const groupShortDescription = function(group) {
     let conditions = `${conditionCount} ${conditionCount === 1 ? 'condition' : 'conditions'}`;
 
     let modifier = modifiers[group.modifier];
-    if (group.modifier === 2) modifier += `[${group.countMin}, ${group.countMax}]`;
+    if (group.modifier === 2) {
+        if (group.countMin === group.countMax) modifier += ` ${group.countMin}`;
+        else modifier += ` ${group.countMin}-${group.countMax}`;
+    }
 
     return `${conditions}, ${modifier}`;
 }

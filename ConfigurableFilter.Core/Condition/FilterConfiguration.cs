@@ -28,6 +28,8 @@ namespace ConfigurableFilters.Condition
                 ConditionGroupModifier.Any => "At least one condition in this group should be true.",
                 ConditionGroupModifier.Count when CountMin > CountMax =>
                     "The minimum number of conditions must be lower than or equal to the maximum.",
+                ConditionGroupModifier.Count when CountMin == CountMax =>
+                    $"{CountMin} conditions in this group should be true.",
                 ConditionGroupModifier.Count =>
                     $"Between {CountMin} and {CountMax} conditions in this group should be true.",
                 _ => throw new ArgumentOutOfRangeException()
