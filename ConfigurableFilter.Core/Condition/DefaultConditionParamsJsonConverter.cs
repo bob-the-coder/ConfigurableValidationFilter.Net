@@ -23,6 +23,7 @@ namespace ConfigurableFilters.Condition
 
         static DefaultConditionParamsJsonConverter()
         {
+            AllowParamType<ConditionParams>();
             AllowParamType<IntValueParam>();
             AllowParamType<StringValueParam>();
             AllowParamType<DateTimeValueParam>();

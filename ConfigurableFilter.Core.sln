@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BoxFilterExample", "BoxScan
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BoxFilter.Test", "BoxScanner.Test\BoxFilter.Test.csproj", "{44D80914-5C38-4979-8375-8E5F842A154E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoxFilterUI", "BoxFilterUI\BoxFilterUI.csproj", "{14187EB1-2A08-4392-AE11-F8652DB8D256}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BoxFilterUI", "BoxFilterUI\BoxFilterUI.csproj", "{14187EB1-2A08-4392-AE11-F8652DB8D256}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

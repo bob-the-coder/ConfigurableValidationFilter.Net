@@ -6,6 +6,7 @@ namespace ConfigurableFilters.Condition
     public class ConditionParams
     {
     }
+
     public class ConditionParamsWithError : ConditionParams
     { 
         public string Error { get; set; }
