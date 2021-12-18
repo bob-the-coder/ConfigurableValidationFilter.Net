@@ -4,105 +4,105 @@
     {
         public static BoxRuleMetadata HeightBetween => new()
         {
-            ConditionType = BoxRules.HeightBetween,
+            RuleType = BoxRules.HeightBetween,
             UiParamType = UiParamType.MinMax,
             Name = "Height is between",
             Description = BoxDescriptions.NumberBetweenMinMax
         };
         public static BoxRuleMetadata HeightEquals => new()
         {
-            ConditionType = BoxRules.HeightEquals,
+            RuleType = BoxRules.HeightEquals,
             UiParamType = UiParamType.Single,
             Name = "Height equals",
             Description = BoxDescriptions.NumberEquals
         };
         public static BoxRuleMetadata WidthBetween => new()
         {
-            ConditionType = BoxRules.WidthBetween,
+            RuleType = BoxRules.WidthBetween,
             UiParamType = UiParamType.MinMax,
             Name = "Width is between",
             Description = BoxDescriptions.NumberBetweenMinMax
         };
         public static BoxRuleMetadata WidthEquals => new()
         {
-            ConditionType = BoxRules.WidthEquals,
+            RuleType = BoxRules.WidthEquals,
             UiParamType = UiParamType.Single,
             Name = "Width equals",
             Description = BoxDescriptions.NumberEquals
         };
         public static BoxRuleMetadata DepthBetween => new()
         {
-            ConditionType = BoxRules.DepthBetween,
+            RuleType = BoxRules.DepthBetween,
             UiParamType = UiParamType.MinMax,
             Name = "Depth is between",
             Description = BoxDescriptions.NumberBetweenMinMax
         };
         public static BoxRuleMetadata DepthEquals => new()
         {
-            ConditionType = BoxRules.DepthEquals,
+            RuleType = BoxRules.DepthEquals,
             UiParamType = UiParamType.Single,
             Name = "Depth equals",
             Description = BoxDescriptions.NumberEquals
         };
         public static BoxRuleMetadata WeightBetween => new()
         {
-            ConditionType = BoxRules.WeightBetween,
+            RuleType = BoxRules.WeightBetween,
             UiParamType = UiParamType.MinMax,
             Name = "Weight is between",
             Description = BoxDescriptions.NumberBetweenMinMax
         };
         public static BoxRuleMetadata WeightEquals => new()
         {
-            ConditionType = BoxRules.WeightEquals,
+            RuleType = BoxRules.WeightEquals,
             UiParamType = UiParamType.Single,
             Name = "Weight equals",
             Description = BoxDescriptions.NumberEquals
         };
         public static BoxRuleMetadata AreaBetween => new()
         {
-            ConditionType = BoxRules.AreaBetween,
+            RuleType = BoxRules.AreaBetween,
             UiParamType = UiParamType.MinMax,
             Name = "Area is between",
             Description = BoxDescriptions.NumberBetweenMinMax
         };
         public static BoxRuleMetadata VolumeBetween => new()
         {
-            ConditionType = BoxRules.VolumeBetween,
+            RuleType = BoxRules.VolumeBetween,
             UiParamType = UiParamType.MinMax,
             Name = "Volume is between",
             Description = BoxDescriptions.NumberBetweenMinMax
         };
         public static BoxRuleMetadata DensityBetween => new()
         {
-            ConditionType = BoxRules.DensityBetween,
+            RuleType = BoxRules.DensityBetween,
             UiParamType = UiParamType.MinMax,
             Name = "Density is between",
             Description = BoxDescriptions.NumberBetweenMinMax
         };
         public static BoxRuleMetadata ReceivedBetween => new()
         {
-            ConditionType = BoxRules.ReceivedBetween,
+            RuleType = BoxRules.ReceivedBetween,
             UiParamType = UiParamType.MinMax,
             Name = "Box was received between",
             Description = BoxDescriptions.DateBetweenMinMax
         };
         public static BoxRuleMetadata ColorIsInList => new()
         {
-            ConditionType = BoxRules.ColorIsInList,
+            RuleType = BoxRules.ColorIsInList,
             UiParamType = UiParamType.Single,
             Name = "Color is one of the following",
             Description = BoxDescriptions.ItemIsInList
         };
         public static BoxRuleMetadata ColorEquals => new()
         {
-            ConditionType = BoxRules.ColorEquals,
+            RuleType = BoxRules.ColorEquals,
             UiParamType = UiParamType.Single,
             Name = "Color is",
             Description = BoxDescriptions.StringEquals
         };
         public static BoxRuleMetadata ColorMatchesRegex => new()
         {
-            ConditionType = BoxRules.ColorMatchesRegex,
+            RuleType = BoxRules.ColorMatchesRegex,
             UiParamType = UiParamType.Single,
             Name = "Color name matches this Regex",
             Description = BoxDescriptions.StringEquals
@@ -110,7 +110,7 @@
 
         public static BoxRuleMetadata IsRecent => new()
         {
-            ConditionType = BoxRules.IsRecent,
+            RuleType = BoxRules.IsRecent,
             UiParamType = UiParamType.Checkbox,
             Name = "Box is recent (1 day)",
             Description = BoxDescriptions.BoolEquals

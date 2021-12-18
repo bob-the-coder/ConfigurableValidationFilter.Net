@@ -2,10 +2,9 @@
 
 namespace ConfigurableValidationFilter.ValidationRules
 {
-    public abstract class RuleMetadata<TCondition>
-    where TCondition : Enum
+    public abstract class RuleMetadata<TRules>
     {
-        public TCondition ConditionType { get; set; }
+        public TRules RuleType { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string ParamType { get; internal set; }

@@ -6,19 +6,19 @@ using ConfigurableValidationFilter.ValidationRules;
 
 namespace ConfigurableValidationFilter
 {
-    public class ConfigurableValidationFilter<TObject, TRuleId>
-        where TRuleId : Enum
+    public class ConfigurableValidationFilter<TObject, TRules>
+        where TRules : Enum
     {
         #region (Constructor and properties)
 
-        private readonly Dictionary<TRuleId, ValidationRule<TRuleId, TObject>> _validationRules = new();
-        public readonly Dictionary<TRuleId, RuleMetadata<TRuleId>> MetaData = new();
+        private readonly Dictionary<TRules, ValidationRule<TRules, TObject>> _validationRules = new();
+        public readonly Dictionary<TRules, RuleMetadata<TRules>> MetaData = new();
 
         #endregion
 
         #region (Public API)
 
-        public ValidationResult ApplyConfiguration(TObject obj, FilterConfiguration<TRuleId> filterConfiguration)
+        public ValidationResult ApplyConfiguration(TObject obj, FilterConfiguration<TRules> filterConfiguration)
         {
             if (filterConfiguration.Groups.Count == 0 || filterConfiguration.Groups.All(group => group.Conditions.Count == 0))
                 return new ValidationResult
@@ -67,18 +67,18 @@ namespace ConfigurableValidationFilter
         }
 
         public void UseCondition<TProperty, TConditionParams>(
-            RuleMetadata<TRuleId> ruleMetadata,
+            RuleMetadata<TRules> ruleMetadata,
             Func<TObject, TProperty> valueProvider,
             Func<TProperty, TConditionParams, bool> comparisonFunc
             )
         where TConditionParams : RuleParameters
         {
-            var conditionType = ruleMetadata.ConditionType;
+            var conditionType = ruleMetadata.RuleType;
             ThrowIfConfigured(conditionType);
 
             var comparisonFuncGeneric = GetGenericComparisonFunc(comparisonFunc);
             ruleMetadata.ParamType = typeof(TConditionParams).Name;
-            var condition = new ValidationRule<TRuleId, TObject, TProperty>(valueProvider, comparisonFuncGeneric, ruleMetadata);
+            var condition = new ValidationRule<TRules, TObject, TProperty>(valueProvider, comparisonFuncGeneric, ruleMetadata);
             _validationRules.Add(conditionType, condition);
             MetaData.Add(conditionType, ruleMetadata);
         }
@@ -87,16 +87,16 @@ namespace ConfigurableValidationFilter
 
         #region (Helpers)
 
-        private bool ConditionIsConfigured(TRuleId _) => _validationRules.ContainsKey(_);
+        private bool ConditionIsConfigured(TRules _) => _validationRules.ContainsKey(_);
 
-        private void ThrowIfConfigured(TRuleId _)
+        private void ThrowIfConfigured(TRules _)
         {
             if (!ConditionIsConfigured(_)) return;
 
             throw new InvalidEnumArgumentException($"ValidationRule {_} is already configured.");
         }
 
-        private void ThrowIfNotConfigured(TRuleId _)
+        private void ThrowIfNotConfigured(TRules _)
         {
             if (ConditionIsConfigured(_)) return;
 

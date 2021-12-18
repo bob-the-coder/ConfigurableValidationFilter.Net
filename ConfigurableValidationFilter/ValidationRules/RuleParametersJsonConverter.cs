@@ -15,31 +15,31 @@ namespace ConfigurableValidationFilter.ValidationRules
 
         protected static readonly Dictionary<Type, string> ParamTypeMap = new();
 
-        private static bool IsParamTypeAllowed(Type paramType)
+        private static bool IsParamTypeIncluded(Type paramType)
             => ParamTypeMap.ContainsKey(paramType);
 
-        private static bool IsParamTypeAllowed(string paramTypeName)
+        private static bool IsParamTypeIncluded(string paramTypeName)
             => ParamTypeMap.ContainsValue(paramTypeName);
 
         static RuleParametersJsonConverter()
         {
-            AllowParamType<RuleParameters>();
-            AllowParamType<IntValueParam>();
-            AllowParamType<StringValueParam>();
-            AllowParamType<DateTimeValueParam>();
-            AllowParamType<BoolValueParam>();
-            AllowParamType<IntListParam>();
-            AllowParamType<StringListParam>();
-            AllowParamType<IntMinMaxParams>();
-            AllowParamType<DoubleMinMaxParams>();
-            AllowParamType<DateTimeMinMaxParams>();
+            Include<RuleParameters>();
+            Include<IntValueParam>();
+            Include<StringValueParam>();
+            Include<DateTimeValueParam>();
+            Include<BoolValueParam>();
+            Include<IntListParam>();
+            Include<StringListParam>();
+            Include<IntMinMaxParams>();
+            Include<DoubleMinMaxParams>();
+            Include<DateTimeMinMaxParams>();
         }
 
-        public static void AllowParamType<TConditionParams>()
+        public static void Include<TConditionParams>()
             where TConditionParams : RuleParameters
         {
             var paramType = typeof(TConditionParams);
-            if (IsParamTypeAllowed(paramType)) throw new ArgumentException("Param types must specified only once.");
+            if (IsParamTypeIncluded(paramType)) throw new ArgumentException("Param types must specified only once.");
 
             ParamTypeMap.Add(paramType, paramType.Name);
         }
@@ -52,7 +52,7 @@ namespace ConfigurableValidationFilter.ValidationRules
         public override void WriteJson(JsonWriter writer, RuleParameters value, NewtonsoftJsonSerializer serializer)
         {
             var paramType = value.GetType();
-            if (!IsParamTypeAllowed(paramType)) ThrowInvalidConfigurationException(paramType.Name);
+            if (!IsParamTypeIncluded(paramType)) ThrowInvalidConfigurationException(paramType.Name);
 
             var jo = JObject.Parse(SystemJsonSerializer.Serialize(value, paramType));
 
@@ -67,7 +67,7 @@ namespace ConfigurableValidationFilter.ValidationRules
         {
             var jo = JObject.Load(reader);
             var paramTypeName = (string)jo[ParamTypeDiscriminator];
-            if (!IsParamTypeAllowed(paramTypeName)) ThrowInvalidConfigurationException(paramTypeName);
+            if (!IsParamTypeIncluded(paramTypeName)) ThrowInvalidConfigurationException(paramTypeName);
 
             var paramType = ParamTypeMap.First(kv => kv.Value == paramTypeName).Key;
             var conditionParamsObject = Activator.CreateInstance(paramType);

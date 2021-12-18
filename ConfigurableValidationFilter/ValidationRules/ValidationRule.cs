@@ -2,15 +2,13 @@
 
 namespace ConfigurableValidationFilter.ValidationRules
 {
-    internal abstract class ValidationRule<TCondition, TObject>
-    where TCondition : Enum
+    internal abstract class ValidationRule<TRules, TObject>
     {
-        public RuleMetadata<TCondition> Metadata { get; set; }
+        public RuleMetadata<TRules> Metadata { get; set; }
         public abstract ValidationResult Validate(TObject obj, RuleParameters ruleParameters);
     }
 
-    internal sealed class ValidationRule<TCondition, TObject, TProperty> : ValidationRule<TCondition, TObject>
-    where TCondition : Enum
+    internal sealed class ValidationRule<TRules, TObject, TProperty> : ValidationRule<TRules, TObject>
     {
         private readonly Func<TObject, TProperty> _valueProvider;
         private readonly Func<TProperty, RuleParameters, bool> _comparator;
@@ -18,7 +16,7 @@ namespace ConfigurableValidationFilter.ValidationRules
         public ValidationRule(
             Func<TObject, TProperty> valueProvider,
             Func<TProperty, RuleParameters, bool> comparator,
-            RuleMetadata<TCondition> metaData)
+            RuleMetadata<TRules> metaData)
         {
             _valueProvider = valueProvider;
             _comparator = comparator;
