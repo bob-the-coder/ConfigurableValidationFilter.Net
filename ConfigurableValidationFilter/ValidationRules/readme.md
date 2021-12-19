@@ -1,13 +1,12 @@
-﻿# All about Validation Rules
+﻿# Chapter 3 - Validation Rules
 
-In this section, we'll be looking over all key aspects of Validation Rules: from how they are defined and used, to how they can be customized to suit one's needs.
+In this section, we'll be looking over all aspects of Validation Rules: from how they can be defined and used, to how they can be customized to suit one's needs.
 
+They are - quite literally - the bread and butter of validation filters. Validation Rules define the criteria which the validated object should pass. In essence, a validation rule is **some  function** one would call for a **given object**, and this **function** yields some results which indicates that the **object** is valid. 
 
+Going off this reasoning,  we can define the most basic type of rule as being some abstract class `ValidationRule`, which in practice can validate **any type** of object.
 
-
-They are - quite literally - bread and butter of validation filters. Validation Rules define criteria which any validated object should pass. In essence, a **validation rule** is **some  function** one would call for a **given object**. Going off this reasoning,  we can define the most basic type of rule as being some generic class `ValidationRule<T>`, where `T` can be **any type** of object. This is a nice abstraction, but as we will see later, it isn't even necessary in practice.
-
-### Validation Rule abstraction
+## 3.1 Thinking in abstract
 ```
 abstract class ValidationRule
 {
@@ -17,179 +16,175 @@ abstract class ValidationRule
 }
 ```
 
-This class describes **the most generic type** of validation rule - the one mentioned just before. 
-
-In practice you'd like a **validation function** to **validate** something, hence the `Validate(...)` method. The method yields a *(drum-rolls)* `ValidationResult`. 
+This is a nice abstraction to get us started. This class describes **the most generic type** of validation rule. It knows how to validate an object. If any extra parameters are needed, they can be passed to the `Validate` method in a `RuleParameters` instance.
 
 Information of any kind, relating to the rule or not, can be stored in the `Metadata` property. The `RuleMetadata` class can be extended in order to store such information.
 
-### Validation Result
+### 3.1.1 Validation Result
 
-Since any operation yields some result, it's only fitting that validation do so too. The most basic example I can think of would include a success indicator, an error message. Extra points for giving me the validated value and any other useful information it may provide. Something like this:
+Since any operation yields some result, it's only fitting that validation do so too. Given that the point of validating something is to find out whether the thing is valid or not, the most basic example of such a result that I can think of would include a success indicator, and an error message. And since we can, why not include the validated value and any other information?. Something like this:
+
 ```
-public class ValidationResult
+class ValidationResult
 {
     public bool Success { get; set; }
     public string ValidatedValue { get; set; }
     public string Error { get; set; }
-    public object MetaData { get; set; }
+    public object Metadata { get; set; }
 }
 ```
 
-### Rule Parameters
+Notice that this time, the `Metadata` property is a generic `object`. If you want to get type-y with it, this class can also be made generic, like so:
 
-These are essentially extra inputs for a given rule. Some rules might require a lower or upper-limit (or both) while others might require a specific value. One rule could require no value, and another might want to cherry-pick a list. Regardless of shape and size, at the end of the day all types of parameters can be boiled down to this:
 ```
-public class RuleParameters
+class ValidationResult<TMetadata> 
+{
+    public bool Success { get; set; }
+    public string ValidatedValue { get; set; }
+    public string Error { get; set; }
+    public TMetadata Metadata { get; set; }
+}
+```
+
+This way, you can define the type of metadata you'd like to use.
+
+### 3.1.2 Rule Parameters
+
+If we think of rules as functions, then these are essentially extra arguments for that function. Some rules might require a lower or upper-limit (min-max) while others might require a specific value. One rule could require no value, and another might want to cherry-pick a list. In practice, rule parameters come in all shapes and sizes. It's nice then, that all we need to cover all this variety is this little snippet.
+
+```
+class RuleParameters
 {
 }
 ```
 
-## Rules, Rules, Rules
+As we will soon find out, the type of parameters is only ever needed when defining a rule. In practice, each rule will already know what type of parameters it uses. More on this later.
+
+## 3.2 Rules, Rules, Rules
 
 There's no way around it. It's a rule-based validation filter. We're talking about rules. 
 
-If I were to buy different types of **fruit**, I would apply **some rules**, depending on the type of fruit I want. I like medium-sized red apples, extra-jumbo green watermelons, and teeny-tiny purple grapes. I'm applying rules on the fruits' size and color, but using different criteria depending on the fruit.
+If I were to buy different types of **fruit**, I would apply **some rules**, depending on the type of fruit I want. Say I like medium-sized red apples, extra-jumbo green watermelons, and teeny-tiny purple grapes. What I'm doing is applying different size and color criteria in order to pick the fruit I want. I'm creating fruit rules.
 
-Thinking code, such a thing usually calls for more abstraction. Or at the very least, some performance-tuning. We can take advantage of the fact that some rules may repeat, and keep track of any rules we'd like to use. Who knows? - it might save performance.
+On the other hand, I also want to buy different types of **clothing**. In this case, I'd have different types of rules, and I'd be applying them to a different type of object. Notice however, that I can apply size and color rules to these **clothing** objects just the same as I could for **fruit**.
 
-## Generic Implementation
+Since technically speaking, any rule can be applied to any object *(whether it makes sense or not)*, we need to find a way to describe these different pairs which are made up of one **validated object** and **rule**.
 
-### ValidationRule&lt;TRules, TObject&gt;
+## 3.3 A Generic Abstraction
+
+To achieve this, we will make the `ValidationRule` class generic by adding the type parameters `TRules` and `TObject`. This will allow us to specify for any given `ValidationRule` the type of object it can validate, and which type of rule is being applied.
 
 ```
-internal abstract class ValidationRule<TRules, TObject>
+abstract class ValidationRule<TRules, TObject>
 {
     public RuleMetadata<TRules> Metadata { get; set; }
     public abstract ValidationResult Validate(TObject obj, RuleParameters ruleParameters);
 }
 ```
-Notice anything different? The abstract class is now generic. Decorated with the two nifty **open types** `TRules` and `TObject`.
 
-The **open type** `TObject` simply defines the **type of object** a filter can validate. Simple as that. You want to validate **some type of object**? You can validate some type of object.
+The **type parameter** `TObject` defines the **type of object** a filter can validate. Simple as that. You want to validate **some type of object** using **some type of rules**? You can do so using an instance of `ValidationRule<SomeRuleType, SomeTypeOfObject>`.
 
-The **open type** `TRules` is a bit more hearty. For instance, it's used to keep track of rules in-memory, and to ensure that every **unique** rule is defined only once. It also plays an important role in (de)serialization and overall performance. Quite the tricky bit.
+The **type parameter** `TRules` is a bit more hearty. It is primarily used to uniquely identify each rule within a filter. It is also used in identifying the different available rules within a filter. More on this later.
 
-The generic abstraction `ValidationRule<TRules, TObject>` puts us on the right track. We now have a way of defining a rule for a **given type** of object, and a means to group together rules pertaining to the same category, whichever that may be.
+These parameters are a step up, and play an important role in convenience and performance. However, it doens't end here. There are many rules which can be defined for any property of a given object. You can have a rule for **size**, a rule for **color**, another different rule for **size**, and so on.
 
-### ValidationRule&lt;TRules, TObject, TProperty&gt;
+## 3.4 Of Values and Validation
 
-Like two type constraints weren't enough, here comes the 
-## Export a file
+There's a rule in *Set Theory* that states that a **Set** is part of the list of all sub-sets of that **Set**. 
 
-You can export the current file by clicking **Export to disk** in the menu. You can choose to export the file as plain Markdown, as HTML using a Handlebars template or as a PDF.
+Let's take, for example, the list of all the values that can be extracted from **any given object**. How about the list of its properties? But what about the list of properties about its properties? And what about the- you get the picture. 
 
+We don't know beforehand what type of value we want to validate. Let's say we want to validate some properties of fruit. Here is an example of some values which can be provided for fruit, and a hopefully-appropriate corresponding data-type:
 
-# Synchronization
-
-Synchronization is one of the biggest features of StackEdit. It enables you to synchronize any file in your workspace with other files stored in your **Google Drive**, your **Dropbox** and your **GitHub** accounts. This allows you to keep writing on other devices, collaborate with people you share the file with, integrate easily into your workflow... The synchronization mechanism takes place every minute in the background, downloading, merging, and uploading file modifications.
-
-There are two types of synchronization and they can complement each other:
-
-- The workspace synchronization will sync all your files, folders and settings automatically. This will allow you to fetch your workspace on any other device.
-	> To start syncing your workspace, just sign in with Google in the menu.
-
-- The file synchronization will keep one file of the workspace synced with one or multiple files in **Google Drive**, **Dropbox** or **GitHub**.
-	> Before starting to sync files, you must link an account in the **Synchronize** sub-menu.
-
-## Open a file
-
-You can open a file from **Google Drive**, **Dropbox** or **GitHub** by opening the **Synchronize** sub-menu and clicking **Open from**. Once opened in the workspace, any modification in the file will be automatically synced.
-
-## Save a file
-
-You can save any file of the workspace to **Google Drive**, **Dropbox** or **GitHub** by opening the **Synchronize** sub-menu and clicking **Save on**. Even if a file in the workspace is already synced, you can save it to another location. StackEdit can sync one file with multiple locations and accounts.
-
-## Synchronize a file
-
-Once your file is linked to a synchronized location, StackEdit will periodically synchronize it by downloading/uploading any modification. A merge will be performed if necessary and conflicts will be resolved.
-
-If you just have modified your file and you want to force syncing, click the **Synchronize now** button in the navigation bar.
-
-> **Note:** The **Synchronize now** button is disabled if you have no file to synchronize.
-
-## Manage file synchronization
-
-Since one file can be synced with multiple locations, you can list and manage synchronized locations by clicking **File synchronization** in the **Synchronize** sub-menu. This allows you to list and remove synchronized locations that are linked to your file.
-
-
-# Publication
-
-Publishing in StackEdit makes it simple for you to publish online your files. Once you're happy with a file, you can publish it to different hosting platforms like **Blogger**, **Dropbox**, **Gist**, **GitHub**, **Google Drive**, **WordPress** and **Zendesk**. With [Handlebars templates](http://handlebarsjs.com/), you have full control over what you export.
-
-> Before starting to publish, you must link an account in the **Publish** sub-menu.
-
-## Publish a File
-
-You can publish your file by opening the **Publish** sub-menu and by clicking **Publish to**. For some locations, you can choose between the following formats:
-
-- Markdown: publish the Markdown text on a website that can interpret it (**GitHub** for instance),
-- HTML: publish the file converted to HTML via a Handlebars template (on a blog for example).
-
-## Update a publication
-
-After publishing, StackEdit keeps your file linked to that publication which makes it easy for you to re-publish it. Once you have modified your file and you want to update your publication, click on the **Publish now** button in the navigation bar.
-
-> **Note:** The **Publish now** button is disabled if your file has not been published yet.
-
-## Manage file publication
-
-Since one file can be published to multiple locations, you can list and manage publish locations by clicking **File publication** in the **Publish** sub-menu. This allows you to list and remove publication locations that are linked to your file.
-
-
-# Markdown extensions
-
-StackEdit extends the standard Markdown syntax by adding extra **Markdown extensions**, providing you with some nice features.
-
-> **ProTip:** You can disable any **Markdown extension** in the **File properties** dialog.
-
-
-## SmartyPants
-
-SmartyPants converts ASCII punctuation characters into "smart" typographic punctuation HTML entities. For example:
-
-|                |ASCII                          |HTML                         |
-|----------------|-------------------------------|-----------------------------|
-|Single backticks|`'Isn't this fun?'`            |'Isn't this fun?'            |
-|Quotes          |`"Isn't this fun?"`            |"Isn't this fun?"            |
-|Dashes          |`-- is en-dash, --- is em-dash`|-- is en-dash, --- is em-dash|
-
-
-## KaTeX
-
-You can render LaTeX mathematical expressions using [KaTeX](https://khan.github.io/KaTeX/):
-
-The *Gamma function* satisfying $\Gamma(n) = (n-1)!\quad\forall n\in\mathbb N$ is via the Euler integral
-
-$$
-\Gamma(z) = \int_0^\infty t^{z-1}e^{-t}dt\,.
-$$
-
-> You can find more information about **LaTeX** mathematical expressions [here](http://meta.math.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference).
-
-
-## UML diagrams
-
-You can render UML diagrams using [Mermaid](https://mermaidjs.github.io/). For example, this will produce a sequence diagram:
-
-```mermaid
-sequenceDiagram
-Alice ->> Bob: Hello Bob, how are you?
-Bob-->>John: How about you John?
-Bob--x Alice: I am good thanks!
-Bob-x John: I am good thanks!
-Note right of John: Bob thinks a long<br/>long time, so long<br/>that the text does<br/>not fit on a row.
-
-Bob-->Alice: Checking with John...
-Alice->John: Yes... John, how are you?
+```
+age (days): int
+color: string
+purchasedOn: date
+weight (g): double
+family: fruitFamily
 ```
 
-And this will produce a flow chart:
+I added the last one to emphasise something: the values we want to validate may turn out to be some complex types. The `FruitFamily` type may be some in-house type, known only to that one software developer. Fortunately, we can write a solution which handles such cases with ease.
 
-```mermaid
-graph LR
-A[Square Rect] -- Link text --> B((Circle))
-A --> C(Round Rect)
-B --> D{Rhombus}
-C --> D
+The generic `ValidationRule<TRules, TObject>` is too wide in scope to cover this variety. We would also like to define different rules in the same way, regardless of the type of value it is supposed to validate.
+
+### 3.4.1 ValidationRule&lt;TRules, TObject, TValue&gt;
+
+```
+class ValidationRule<TRules, TObject, TValue> : ValidationRule<TRules, TObject>
+{
+}
+```
+
+The `FruitFamily` example may have painted a darker picture that what is actually going on. By splitting business logic into 2 key parts.
+
+We begin by taking into account the validated value, as defined by the **type parameter** `TValue`. Now our `ValidationRule` specifies which type of value it can validate.
+
+Unfortunately, knowing what to validate and actually validating the thing are two different discussions. We've already handled the former, now it's time for the latter.
+
+To figure out how a validation rule can validate some value, we need to think like a validation rule.
+
+### 3.4.2 What to get and what to do?
+
+Imagine you're a validation rule. Your one job is making sure that thing you're checking fits some criteria that is out of your sphere of influence and control. Imagine you're so good at it, that you just need to know what you're checking and how you should check it, and voila! You just do. And it works. Every time.
+
+In order to be able to apply seemingly random criteria on any given value, without prior knowledge of what the value or criteria are, seems like a lot even for our prolific validation rule. 
+
+Such versatility comes easy through the power of configuration. If we specify to our validation rule **what** to validate and **how** to validate it, we relieve it of the burden of knowledge, and allow it to focus only on the actual validation.
+
+### 3.4.3 What to validate?
+
+The **what** is relatively easy. Since the validated value can come from virtually any source, we make use of lambdas to specify a function which, when called, returns the value the rule is supposed to validate, like so:
+
+```
+Func<TValue> ValueProvider;
+```
+
+Since in practice, we would want to validate values derived from our **object**, we should also include the **object** in the parameters provided to this function.
+
+```
+class ValidationRule<TRules, TObject, TValue> : ValidationRule<TRules, TObject>
+{
+    public Func<TObject, TValue> ValueProvider { get; set; }
+}
+```
+
+This way, the `ValueProvider` function can be called on the validated object.
+
+Now the validation rule can be told **what** to validate. Because the value is returned by a function, it's easy in practice to configure different and varied ways of obtaining these values.
+
+### 3.4.4 How to validate?
+
+The **how** gives us a bit more to think about. We want to tell the validation rule how to validate the value yielded by the `ValueProvider` function. 
+
+We're going to use another lambda for this, but we have to keep something in mind: some validation rules require extra parameters to be specified.
+This new lambda will check that the value respects some criteria, as defined by its implementation.
+
+```
+class ValidationRule<TRules, TObject, TValue> : ValidationRule<TRules, TObject>
+{
+    public Func<TObject, TValue> ValueProvider { get; set; }
+    public Func<TValue, RuleParameters, bool> Comparator { get; set; }
+}
+```
+
+Our `Comparator` function takes as parameters the validated value, and any extra parameters. It returns a `bool` indicating whether the value passes the validation criteria as defined by the function's implementation.
+
+The `ValidationRule` class can now be told **how** to validate the value by providing it a comparator function. Now all that needs doing is putting the **what** and the **how** together.
+
+## 3.5 Less talking, more validating
+
+Back when we created the abstract class `ValidationRule<TRules, TObject>`, we included a method definition for validation.
+
+```
+public abstract ValidationResult Validate(TObject obj, RuleParameters ruleParameters);
+```
+
+Now we will implement this method in the new class. The `ValidationRule<TRules, TObject, TValue>` implementation already has all the necessary pieces. If we were to care only about the end-result (validation success), we could write our `Validate` method like this:
+
+```
+public override ValidationResult Validate(TObject obj, RuleParameters ruleParameters)
+{
+    return Comparator()
+}
 ```

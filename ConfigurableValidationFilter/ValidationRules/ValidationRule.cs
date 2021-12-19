@@ -8,14 +8,14 @@ namespace ConfigurableValidationFilter.ValidationRules
         public abstract ValidationResult Validate(TObject obj, RuleParameters ruleParameters);
     }
 
-    internal sealed class ValidationRule<TRules, TObject, TProperty> : ValidationRule<TRules, TObject>
+    internal sealed class ValidationRule<TRules, TObject, TValue> : ValidationRule<TRules, TObject>
     {
-        private readonly Func<TObject, TProperty> _valueProvider;
-        private readonly Func<TProperty, RuleParameters, bool> _comparator;
+        private readonly Func<TObject, TValue> _valueProvider;
+        private readonly Func<TValue, RuleParameters, bool> _comparator;
 
         public ValidationRule(
-            Func<TObject, TProperty> valueProvider,
-            Func<TProperty, RuleParameters, bool> comparator,
+            Func<TObject, TValue> valueProvider,
+            Func<TValue, RuleParameters, bool> comparator,
             RuleMetadata<TRules> metaData)
         {
             _valueProvider = valueProvider;
